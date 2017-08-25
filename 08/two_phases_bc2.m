@@ -11,7 +11,7 @@ for cp = [0 ]
     % The contrast between permeability layers can be varied one layer has
     % permeability of 10*milli*darcy, the secon is varied as
     % 10*10^(-per)*milli*darcy
-    for per=[4 ]
+    for per=[0 ]
        
         % In this part the solver is chosen 0 means ICCG (no deflation) and
         % 1 is with deflation
@@ -308,12 +308,12 @@ nf=nf1;
                         defcondnumb
                     end
                     %%If we want to save the files/graphs, it's neccesary to run savefilesf
-                    savefilesf
-                        for i = 1 : nf
-        f(i) = figure(i);
-        savefigures(f(i), file{i}, dir2)
-        pause
-    end
+%                     savefilesf
+%                         for i = 1 : nf
+%         f(i) = figure(i);
+%         savefigures(f(i), file{i}, dir2)
+%       %  pause
+%     end
                     
                     
                 end

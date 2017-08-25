@@ -11,14 +11,15 @@ for cp = [ 0  ]
     % The contrast between permeability layers can be varied one layer has
     % permeability of 10*milli*darcy, the secon is varied as
     % 10*10^(-per)*milli*darcy
-    for per=[ 0  ]
+    for per=[ 1  ]
         
         % In this part the solver is chosen 0 means ICCG (no deflation) and
         % 1 is with deflation
-        for def=[0 1 ]
-            
+        for def=[1 ]
+            def
             % If we want to use POD as deflation vectors pod=1
-            for pod = [0 1 ]
+            for pod = [  1]
+                pod
                 clearvars -except per def pod cp
                 
                 
@@ -50,8 +51,8 @@ for cp = [ 0  ]
                     
                     
                     %Create the directory
-                    dir='/mnt/sda2/cortes/Results/2017/Report/wbt/bc/';
-                    dir='/dev/media/Sphinx/Doctorado_Delft/2017/08/Report/wtb/bc/';
+                    dir='/mnt/sda2/cortes/Results/2017/Report/wbt/bc/08_25/';
+                   % dir='/dev/media/Sphinx/Doctorado_Delft/2017/08/Report/wtb/bc/';
                     folder=[ '10-' num2str(k) '_' num2str(sz) 'nz' num2str(nz) 'perm_' num2str(per) 'cp' num2str(cp)];
                     mkdir([dir], folder)
                     dir1 = [dir folder '/'];
@@ -174,14 +175,7 @@ for cp = [ 0  ]
                     pv     = poreVolume(G,rock);
                     t      = 0;
                     plotNo = 1;
-                    nf = nf + 1;
-                    figure(nf);
-                    %title('Water Saturation');
-                    file{nf} = ['Water_saturation'];
-                    nf1 = nf + 1;
-                    figure(nf1);
-                    %title('Pressure [bars]');
-                    file{nf1} = ['Pressure'];
+                    
                     ts=0;
                     podi=0;
                     while t < T,
@@ -207,18 +201,22 @@ for cp = [ 0  ]
                                 Z=Zp(:,podi:podi+dv-1);
                                 if pod==1
                                     
-                                    [U,S]=defpodf_Dt(Z,dir2,dv,t/day(),dTplot/day());
+                                  % [U,S]=defpodf_Dt(Z,dir2,dv,t/day(),dTplot/day());
                                     
+                                    
+                                   [U,S]=PODbasis(Z);
+                                    if t/day() == 4600
                                     nf = nf + 1;
+                                    file{nf} = ['eig_pod_' num2str(t/day())];
                                     f(nf) = figure(nf);
-                                    file{nf} = ['eig_pod'];
-                                    [U,S]=PODbasis(x)
-                                    plot(sqrt(abs(diag(S)))); 
+                                    plot(log((diag(S))),'*r'); 
                                     ylabel('log(Value) ','FontSize',16)
                                     xlabel('Eigenvalue','FontSize',16)
                                     axis('tight')
+                                    end
                                     Z=U(:,dpod);
                                 end
+                               % return
                                 lsolver = 4;
                                 psolverop
                                 fn = @(A, b) solver.solveLinearSystem(A, b);
@@ -227,6 +225,8 @@ for cp = [ 0  ]
                                 
                             end
                         end
+                        
+                        
                         if ceigs == 1
                             [Vn,Dn] = eigs(rSol.A,length(rSol.A));
                             Dn = diag(Dn);
@@ -250,12 +250,17 @@ for cp = [ 0  ]
                     time = (dT:dT:T)/day;
                     px = [0.01 0.26 0.51 0.76];
                     
+                    nf = nf + 1;
+                    figure(nf);
+                    %title('Water Saturation');
+                    file{nf} = ['Water_saturation'];
                     clim = [0 1];
-                    file{nf} = ['Saturation'];
                     subplotcb(nf,clim,ts,Np,G,nz,time,Sat_w)
-                    
-                    clim = [pmin pmax];
+                    nf1 = nf + 1;
+                    figure(nf1);
+                    %title('Pressure [bars]');
                     file{nf1} = ['Pressure'];
+                    clim = [pmin pmax];
                     subplotcb(nf1,clim,ts,Np,G,nz,time,Pressure1)
                     nf=nf1;
                     

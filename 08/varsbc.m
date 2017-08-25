@@ -9,7 +9,7 @@ lsolver=3;
 tsolver=2;
 % We define the size of the reservoir and the inicial points of the grid
 % sz is the number of cells, is the same for the two dimensions
-sz=9;
+sz=32;
 
  
 % If we use wells, we can define here the position of the wells
@@ -56,6 +56,6 @@ podv{2}=[6:10];
     T      = 4800*day();
     %T      = 100*day();
 
-    dT     = T/480;
+    dT     = T/240;
     dTplot = ceil(T/3);  % plot only every 100th day
  

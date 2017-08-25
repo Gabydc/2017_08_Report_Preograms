@@ -51,7 +51,7 @@ for cp = [ 0  ]
                     
                     %Create the directory
                     dir='/mnt/sda2/cortes/Results/2017/Report/wbt/bc/';
-                    dir='/dev/media/Sphinx/Doctorado_Delft/2017/08/Report/wtb/bc/';
+                   % dir='/dev/media/Sphinx/Doctorado_Delft/2017/08/Report/wtb/bc/';
                     folder=[ '10-' num2str(k) '_' num2str(sz) 'nz' num2str(nz) 'perm_' num2str(per) 'cp' num2str(cp)];
                     mkdir([dir], folder)
                     dir1 = [dir folder '/'];
@@ -209,16 +209,20 @@ for cp = [ 0  ]
                                     
                                     [U,S]=defpodf_Dt(Z,dir2,dv,t/day(),dTplot/day());
                                     
+                                    
+                                    [U,S]=PODbasis(Z);
+                                    if ts == 11
                                     nf = nf + 1;
-                                    f(nf) = figure(nf);
                                     file{nf} = ['eig_pod'];
-                                    [U,S]=PODbasis(x)
-                                    plot(sqrt(abs(diag(S)))); 
+                                    f(nf) = figure(nf);
+                                    plot(sqrt(abs(diag(S))),'*r'); 
                                     ylabel('log(Value) ','FontSize',16)
                                     xlabel('Eigenvalue','FontSize',16)
                                     axis('tight')
+                                    end
                                     Z=U(:,dpod);
                                 end
+                                %return
                                 lsolver = 4;
                                 psolverop
                                 fn = @(A, b) solver.solveLinearSystem(A, b);
