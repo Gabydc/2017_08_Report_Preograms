@@ -6,12 +6,12 @@ close all
 clear all
 clc
 % The capillary pressure can be taked into account (cp =1)
-for cp = [ 0 1 ]
+for cp = [ 0  ]
     
     % The contrast between permeability layers can be varied one layer has
     % permeability of 10*milli*darcy, the secon is varied as
     % 10*10^(-per)*milli*darcy
-    for per=[ 0 1 2 3 4 5 6 7 ]
+    for per=[ 0  ]
         
         % In this part the solver is chosen 0 means ICCG (no deflation) and
         % 1 is with deflation
@@ -51,7 +51,7 @@ for cp = [ 0 1 ]
                     
                     %Create the directory
                     dir='/mnt/sda2/cortes/Results/2017/Report/wbt/bc/';
-                    
+                    dir='/dev/media/Sphinx/Doctorado_Delft/2017/08/Report/wtb/bc/';
                     folder=[ '10-' num2str(k) '_' num2str(sz) 'nz' num2str(nz) 'perm_' num2str(per) 'cp' num2str(cp)];
                     mkdir([dir], folder)
                     dir1 = [dir folder '/'];
@@ -208,6 +208,15 @@ for cp = [ 0 1 ]
                                 if pod==1
                                     
                                     [U,S]=defpodf_Dt(Z,dir2,dv,t/day(),dTplot/day());
+                                    
+                                    nf = nf + 1;
+                                    f(nf) = figure(nf);
+                                    file{nf} = ['eig_pod'];
+                                    [U,S]=PODbasis(x)
+                                    plot(sqrt(abs(diag(S)))); 
+                                    ylabel('log(Value) ','FontSize',16)
+                                    xlabel('Eigenvalue','FontSize',16)
+                                    axis('tight')
                                     Z=U(:,dpod);
                                 end
                                 lsolver = 4;
@@ -274,7 +283,7 @@ for cp = [ 0 1 ]
                             ylabel('Number of iterations','FontSize',16)
                             xlabel('Time (days)','FontSize',16)
                             axis square
-                           % title(['Iterations DICCG, ' num2str(dv) ' deflation vectors'],'FontSize',16)
+                            % title(['Iterations DICCG, ' num2str(dv) ' deflation vectors'],'FontSize',16)
                         else
                             plot(time(1:dv),its(1:dv),'r*');
                             hold on
@@ -284,28 +293,28 @@ for cp = [ 0 1 ]
                             ylabel('Number of iterations','FontSize',16)
                             xlabel('Time [days]','FontSize',16)
                             axis square
-                           % title(['Iterations DICCG, ' num2str(dv) ' snapshots, ' num2str(numel(dpod)) ' POD vectors '],'FontSize',16)
+                            % title(['Iterations DICCG, ' num2str(dv) ' snapshots, ' num2str(numel(dpod)) ' POD vectors '],'FontSize',16)
                         end
                     end
-                        
-                        
-                        if cn == 1
-                            defcondnumb
-                        end
-                        %%If we want to save the files/graphs, it's neccesary to run savefilesf
-                        for i = 1 : nf
-                            f(i) = figure(i);
-                            savefigures(f(i), file{i}, dir2)
-                        end
-                        clear figure f
-                        savefilesf
-                        
-                        
-                        
+                    
+                    
+                    if cn == 1
+                        defcondnumb
                     end
+                    %%If we want to save the files/graphs, it's neccesary to run savefilesf
+                    for i = 1 : nf
+                        f(i) = figure(i);
+                        savefigures(f(i), file{i}, dir2)
+                    end
+                    clear figure f
+                    savefilesf
+                    
+                    
+                    
                 end
             end
         end
     end
-    
-    
+end
+
+

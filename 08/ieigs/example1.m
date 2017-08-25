@@ -20,6 +20,6 @@ mesh(z)
 %  end
 
  D=x'*x;
-[U,S]=PODbasis(X);
-
+[U,S]=PODbasis_ext(X);
+break
 [U1,S1]=PODbasissvd(X);

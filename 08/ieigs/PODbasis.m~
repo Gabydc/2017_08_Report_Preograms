@@ -2,14 +2,24 @@
 %linear system is solved with the CGF conjugate gradient function
 
 function [U,S]=PODbasis(x)
-%x=zupd;
-for i=1:size(x,2)
-    x(:,i)=x(:,i)/norm(x(:,i));
-end
+% Number of unknowns 
 lx=size(x,1);
+% Number of snapshots
 ly=size(x,2);
-D=x'*x;
-[V,L] = eigs(D,ly);
+
+% % Normalize the snapshots
+for i=1:ly
+    x(:,i)=x(:,i)/norm(x(:,i)); 
+end
+%Compute mean of the snapshots
+xm = mean(x,2);
+if ly == 2
+else
+for i=1:ly
+    x(:,i)=x(:,i)-xm;
+end
+end
+D=(1/ly)*x'*x;
 %size(D)
 %size(V)
 %size(L)
@@ -29,9 +39,9 @@ U=x*V*S';
 % size(U)
 xax=1:ly;
 figure
-plot(log(g1),'ob')
+plot(xax,log(sqrt(abs(g1))),'ob')
 hold on
-plot(log(sqrt(abs(g))),'*r')
+plot(xax,log(sqrt(abs(g))),'*r')
 axis('tight')
 title(['Eigenvalues R=X*X^T'],'FontSize',16);
 ylabel('log(Value) ','FontSize',16)

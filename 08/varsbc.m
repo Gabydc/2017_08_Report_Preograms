@@ -9,7 +9,7 @@ lsolver=3;
 tsolver=2;
 % We define the size of the reservoir and the inicial points of the grid
 % sz is the number of cells, is the same for the two dimensions
-sz=32;
+sz=9;
 
  
 % If we use wells, we can define here the position of the wells
