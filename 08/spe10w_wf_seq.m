@@ -60,7 +60,7 @@ end
             
     
     %Create the directory
-    dir='/mnt/sda2/cortes/Results/17_04/two_phases/25/spe/';
+    dir='/mnt/sda2/cortes/Results/17_08/spe/';
     
     folder=[ 'spe10-' num2str(k) '_' 'nz' num2str(nz) 'cp' num2str(cp)];
     mkdir([dir], folder)

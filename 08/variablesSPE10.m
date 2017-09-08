@@ -1,3 +1,9 @@
+% close all
+% clear all
+% rr=1;
+% pod=0;
+% cp=0;
+% def=0;
 %% Setting up the linear solver
 %Select a linear solver 1.AGMG, 2.GMRES, 3.PCG_IC, 4.DPCG_IC, other Backslash
 lsolver=3;
@@ -5,6 +11,7 @@ lsolver=3;
 tsolver=2;
 % We define the maximum of iterations for the liner solver
 maxIterations=500;
+steps =200;
 % We define the tolerance of the linear solver
 k=11;
 tol = 10^-k;
@@ -44,62 +51,78 @@ nw = 2;
 no = 2;
 kw = 1;
 ko = 1;
-%% Dimentions of the reservoir
-sz = 35;
-nxi=1;
-nyi=1;
-nx=sz;
-ny=sz;
-nz=1;
-Lx=350;
-Ly=350;
+%% Dimentions of the reservoir SPE 10
+layers = 1;
+
+nxi = 1;
+nyi = 1;
+nx = 16;
+ny = 56;
+nz = numel(layers);
+Lx = 60;
+Ly = 220;
 Lz = 1;
 
-%%
-cartDim = [nx ny nz];
-domain = [Lx Ly Lz];
-G      = computeGeometry(cartGrid(cartDim,domain));
+    %The grid and the permeability are obtained from the MRST
+   
+    %physDims = [1200, 2200, 2*cartDims(end)] ;   % ft -> m
 
-%% Rock properties
-rperm = 1;
-rporo = 0.1;
-%  Number of layers with different permeability
-pl = true;
-rlay = 7;
-%per = 0;
+   % max(rock.perm)/min(rock.perm)
+    %The permeability is 
+    
+ 
+
+
+
+%%
+cartDims = [  nx,  ny, nz];
+%cartDims = [nx ny nz];
+domain = [Lx Ly Lz];
+%physDims = [600, 2200, 2*cartDim(end)] ;  
+
+%physDims = cartDims .* [20, 10, 2]*ft;
+%G = cartGrid([nx ny nz]);
+%G = computeGeometry(G);
+G      = computeGeometry(cartGrid(cartDims,domain));
+%G = computeGeometry(cartGrid(cartDims, physDims));
+
+rock     = SPE10_rock(layers);
+rock.perm = convertFrom(rock.perm, milli*darcy);
+    perm = rock.perm(:,1);
+    perm = reshape(perm,[60 220 nz]);
+    permupscaled = sampleFromBox(G,perm);
+    rock.perm=permupscaled;
+   poro = rock.poro(:,1);
+    poro = reshape(poro,[60 220 nz]);
+    poroupscaled = sampleFromBox(G,poro);
+    rock.poro=poroupscaled;    
+    
+    
+%     max(rock.perm)
+%     min(rock.perm)
+    contperm=max(rock.perm)./min(rock.perm);
+is_pos             = rock.poro > 0;
+rock.poro(~is_pos) = min(rock.poro(is_pos));
+
+
+
+%G      = computeGeometry(cartGrid(cartDim,physDims));
 
 %% Wells
 %W1_val = 5*meter^3/day;
 % W1_val = 100*barsa;
 % W2_val = 0*barsa;
 % %% Wells values
-well(2:5)=-200*barsa;
+well(2:5)=275*barsa;
 % % well(5)=5*meter^3/day;
-well(1) = 200*barsa;
+well(1) = 1100*barsa;
 
 
 %% Rock properties
 
 % Set rock initial properties
-rock   = makeRock(G, rperm*milli*darcy, rporo);
+%rock   = makeRock(G, rperm*milli*darcy, rporo);
 pv     = poreVolume(G, rock);
-
-% Create layers of  diverse permeability
-if pl == true
-    v = [];
-    for i = 1:2*rlay:ny
-        for j = 0:rlay-1
-            if i+j < ny+1
-                v = [v j+i];
-            end
-        end
-    end
-
-
-    [I] = Sub2ind([1:nx],v,1:nz,nx,ny,nz);
-    rock.perm(I) = rperm*10^(-per)*milli*darcy();
-
-end
 
 
 
@@ -115,8 +138,7 @@ end
 %% Various wells
 wtype    = {'bhp', 'bhp', 'bhp', 'bhp', 'bhp'};
 wtarget  = [well(1),   well(2),   well(3),   well(4), well(5)];
-%wrad     = [0.125, 0.125, 0.125, 0.125, 0.125] .* meter;
-wrad     = [0.2, 0.2, 0.2, 0.2, 0.2] .* meter;
+wrad     = [0.125, 0.125, 0.125, 0.125, 0.125] .* meter;
 wloc     = {Sub2ind(ceil(nx/2),ceil(ny/2),1:nz,nx,ny,nz),......
             Sub2ind(nxi,nyi,1:nz,nx,ny,nz),Sub2ind(nxi,ny,1:nz,nx,ny,nz), ...
             Sub2ind(nx,nyi,1:nz,nx,ny,nz),Sub2ind(nx,ny,1:nz,nx,ny,nz)};
@@ -144,24 +166,83 @@ end
 
 
 
-
 nf = nf + 1;
 f(nf) = figure(nf);
 figure(nf)
-plotCellData(G, rock.perm/(milli*darcy()),'LineStyle','none'); colorbar
- axis equal tight off
+%plotCellData(G, log(rock.perm(:,1)),'LineStyle','none');
+
+clf;
+plotCellData(G, log(rock.perm(:,1)));
+
+
+
 for i = 2 :numel(W)
     plotWell(G, W(i),'color', 'r');
 end
 plotWell(G, W(1), 'color', 'b');
+
 file{nf} = 'Permeability';
-title([file{nf} ' field [mD]'])
+%title([file{nf} ' field [mD]'])
 if nz > 1
-    view(10,20)
+    view(50,30)
 else
     view(0,90)
 end
+axis equal off
 hold off
+break
+                    %% Changing wells
+                    %Create a well structure to support multiple report steps
+                    %clear newW
+                    [newW{1:steps,1}] = deal(W);
+                    BHP = zeros(numel(W),steps);
+                   % Valr = zeros(numel(W),steps);
+                    %Then we'll assign the time-dependent controls
+                    tch =5;
+                    csteps = numel(steps/tch);
+                    
+                    h = 0;
+                    while tch*(h+1) < steps
+                        h=h+1;
+                       BHP(1,(h-1)*tch+1:tch*h) = rand;
+                       BHP(3,(h-1)*tch+1:tch*h) = rand;
+                    end
+%                     
+                     BHP(2,:) = 1-BHP(3,:);
+                     BHP(4,:) = 1-BHP(1,:);
+%                     figure
+%                     plot(BHP(1,:))
+%                     hold on
+%                     plot(BHP(2,:))
+%                     hold on
+%                     plot(BHP(3,:))
+%                     hold on
+%                     plot(BHP(4,:))
+%                     break
+                   
+                   
+%                     Valr(1,1:steps/2) = linspace(0.5, 0.8, steps/2)/day;
+%                     Valr(2,steps/2+1:steps) = linspace(0.5, 0.8, steps/2)/day;
+%                     Valr(4,1:steps/2) = linspace(0.5, 0.8, steps/2)/day;
+%                     Valr(3,steps/2+1:steps) = linspace(0.5, 0.8, steps/2)/day;
+                    %Valr(5,1:steps) = linspace(0.5, 0.8, steps)/day;
+                    %Valr =  linspace(0.5, 1, steps)/day();
+            
+                    for w = 1:numel(newW),
+                        for i = 2:5
+                            newW{w}(i).type = 'bhp';
+                             newW{w}(i).val= BHP(i-1,w)*550*barsa;
+%                             newW{w}(i).type = 'rate';
+%                            newW{w}(i).val = Valr(i,w);                       
+                        end
+                    end
+                    
+
+
+
+
+
+
 
 %% Fluid model
 
@@ -218,14 +299,14 @@ nf = nf + 1;
 figure(nf)
 file{nf} = ['Relative_permeability'];
 s = linspace(0, 1, 1001).'; kr = fluid.relperm(s);
-h=plot(s, kr); %legend('kr_1', 'kr_2')%,title(['Relative permeability']), axis equal tight
+h=plot(s, kr); legend('kr_1', 'kr_2'),title(['Relative permeability']), axis equal tight
 hold off
 
 %% Create the directory
 
-dir='/mnt/sda2/cortes/Results/2017/Report/wbt/5wells/35/1/';
+dir='/mnt/sda2/cortes/Results/17_08/30/';
 
-folder=[ '10-' num2str(k) '_' num2str(sz) 'perm_' num2str(per) 'cp' num2str(cp)];
+folder=['SPE10_' num2str(nx) '_' num2str(ny) 'l_' num2str(numel(layers)) 'cp_'  num2str(cp) ];
 mkdir([dir], folder)
 dir1 = [dir folder '/'];
 

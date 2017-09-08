@@ -46,7 +46,7 @@ for cp = [0 ]
                     
                     
                     %Create the directory
-                    dir='/mnt/sda2/cortes/Results/17_09/training';
+                    dir='/mnt/sda2/cortes/Results/17_09/training/';
                     
                     folder=[ '10-' num2str(k) '_' num2str(sz) 'nz' num2str(nz) 'perm_' num2str(per) 'cp' num2str(cp)];
                     mkdir([dir], folder)
@@ -404,37 +404,87 @@ axis off
     end
 end
 
-%%
-% Second, we plot the oil rate used in our simulation in units m^3/day
-figure;
-qOs = cellfun(@(x) abs(x(2).qOs), wellSols);
-t = 0 : dT : T;
-t=t';
-stairs(t, qOs([1:end end])*day,'LineWidth',1); %axis([0 1.2 30 260]);
-% figure;
-% for i = 1:numel(W)
-% bhp(:,i) = cellfun(@(x) abs(x(i).bhp), wellSols);
-% plot(t,bhp,'Color' ,[rand 0 rand], 'title',[ 'Well' num2str(i)])
-% hold on
-% end
-% 
-% %%
-% % Last, we plot the cumulative oil production computed from the well
-% % solution and compare this with the amount of extracted oil derived from a
-% % mass-balance computation (initial oil in place minus current oil in
-% % place). We also include a horizontal line indicating the initial oil in
-% % place, and a straight line showing the amount of oil we would have
-% % extracted if oil was produced at the constant initial rate
-% figure
-% plot(t,cumsum(bsxfun(@times, abs(cellfun(@(x) x(2).qOs, wellSols)), dt)));
-% hold on;
-% plot(t,oip(1)-oip,'-.','LineWidth',3);
-% plot([0 1.2],oip([1 1]),'-k',t,min(t*oip(1),oip(1)),'-k', ...
-%     t(W(2).bt+[0 0]),[0 oip(1)],'--k');
-% hold off; axis tight; axis([0 max(t) 0 1.05*oip(1)]);
-% 
-% 
-%% Plotting with GUI from ad-core
-mrstModule add ad-core
-plotWellSols(wellSols)
-
+                nf = nf + 1;
+                figure(nf);
+                file{nf} = ['Production_curves'];
+                plot(t,cellfun(@(x) x(2).Sw, wellSols), ...
+                    t,cellfun(@(x) x(2).wcut, wellSols));
+                legend('Sw in completion','Water cut','Location','NorthWest');
+                axis([0 max(t) -.05 1.0]);
+                xlabel('Time (PVI)','FontSize',14)
+                ylabel('Saturation','FontSize',14)
+                
+                %%
+                % Second, we plot the oil rate used in our simulation in units m^3/day
+                nf = nf + 1;
+                figure(nf);
+                file{nf} = ['Oil_rate'];
+                
+                for i = 1 : numel(W)
+                    qOs = cellfun(@(x) abs(x(i).qOs), wellSols);
+                    plot(t, qOs([2:end end])*day,'LineStyle','--', 'Color', pcol{i},'Marker',pmark(i),'MarkerSize',4); %axis([0 1.2 ]);
+                    hold on
+                end
+                legend(wname,'Location','NorthEast');
+                axis tight
+                xlabel('Time (PVI)','FontSize',14)
+                ylabel('Oil rate [m^3/day]','FontSize',14)
+                %%
+                % Second, we plot the water rate used in our simulation in units m^3/day
+                nf = nf + 1;
+                figure(nf);
+                file{nf} = ['Water_rate'];
+                for i = 1 : numel(W)
+                    qWs = cellfun(@(x) abs(x(i).qWs), wellSols);
+                    plot(t, qWs([2:end end])*day,'LineStyle','--', 'Color', pcol{i},'Marker',pmark(i),'MarkerSize',4); %axis([0 1.2 ]);
+                    hold on
+                end
+                legend(wname,'Location','NorthEast'); axis tight
+                xlabel('Time (PVI)','FontSize',14)
+                ylabel('Water rate [m^3/day]','FontSize',14)
+                %
+                % Second, we plot the water rate used in our simulation in units m^3/day
+                nf = nf + 1;
+                figure(nf);
+                file{nf} = ['bhp'];
+                for i = 1 : numel(W)
+                    bhp = cellfun(@(x) abs(x(i).bhp), wellSols);
+                    bhpv = bhp([2:end end]);
+                    plot(t, bhpv./barsa,'LineStyle','--', 'Color', pcol{i},'Marker',pmark(i),'MarkerSize',4); %axis([0 1.2 ]);
+                    hold on
+                end
+                legend(wname,'Location','NorthEast'); axis tight
+                xlabel('Time (PVI)','FontSize',14)
+                ylabel('Bhp [bars]','FontSize',14)
+                
+                
+                %
+                % Last, we plot the cumulative oil production computed from the well
+                % solution and compare this with the amount of extracted oil derived from a
+                % mass-balance computation (initial oil in place minus current oil in
+                % place). We also include a horizontal line indicating the initial oil in
+                % place, and a straight line showing the amount of oil we would have
+                % extracted if oil was produced at the constant initial rate
+%                 nf = nf + 1;
+%                 figure(nf);
+%                 file{nf} = ['Cum_Oil_P'];
+%                 plot(t,cumsum(bsxfun(@times, abs(cellfun(@(x) x(2).qOs, wellSols)), dt)));
+%                 hold on;
+%                 plot(t,oip(1)-oip,'-.','LineWidth',3);
+%                 plot([0 1.2],oip([1 1]),'-k',t,min(t*oip(1),oip(1)),'-k', ...
+%                     t(W(2).bt+[0 0]),[0 oip(1)],'--k');
+%                 hold off; axis tight; axis([0 max(t) 0 1.05*oip(1)]);
+%                 xlabel('Time (PVI)','FontSize',14)
+%                 ylabel('Cumulative Oil Production [m^3/day]','FontSize',14)
+                
+                
+                % %% Plotting with GUI from ad-core
+                % mrstModule add ad-core
+                % plotWellSols(wellSols,cumsum(dt))
+                %%
+                if sf == true
+                    for i = 1 : nf
+                        f(i) = figure(i);
+                        savefigures(f(i), file{i}, dir2)
+                    end
+                end

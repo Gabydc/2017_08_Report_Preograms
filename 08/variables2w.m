@@ -51,8 +51,8 @@ nyi=1;
 nx=sz;
 ny=sz;
 nz=1;
-Lx=sz;
-Ly=sz;
+Lx=300;
+Ly=300;
 Lz = nz;
 
 %%
@@ -136,9 +136,9 @@ end
 [I1] = Sub2ind(1,1,1:nz,nx,ny,nz);
 [I2] = Sub2ind(nx,ny,1:nz,nx,ny,nz);
 W = addWell([],G, rock, I1, 'Type', 'bhp', ...
-    'Val', W1_val , 'name', 'I', 'radius', .125, 'Comp_i', [1 0]);
+    'Val', W1_val , 'name', 'I', 'radius', .25, 'Comp_i', [1 0]);
 W = addWell(W,G, rock, I2, 'Type', 'bhp', ...
-    'Val', W2_val , 'name', 'P', 'radius', .125, 'Comp_i', [0 1]);
+    'Val', W2_val , 'name', 'P', 'radius', .25, 'Comp_i', [0 1]);
 
 nf = nf + 1;
 f(nf) = figure(nf);
@@ -218,7 +218,7 @@ hold off
 
 %% Create the directory
 
-dir='/mnt/sda2/cortes/Results/2017/Report/2wells1/';
+dir='/mnt/sda2/cortes/Results/2017/Report/wbt/2wells/1/';
 
 folder=[ '10-' num2str(k) '_' num2str(sz) 'perm_' num2str(per) 'cp' num2str(cp)];
 mkdir([dir], folder)

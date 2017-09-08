@@ -16,6 +16,7 @@ if ~exist(text, 'file')
     fprintf(fileID,'\\hline\n');
     fprintf(fileID,'$\\frac{\\sigma_2}{\\sigma_1}$&Total&Method  & ICCG&DICCG &Total&\\%% of total\\\\ \n');
     fprintf(fileID,'                           & ICCG     &  & Snapshots& &ICCG& ICCG\\\\ \n');
+    fprintf(fileID,'                                    &    &  & & &+ DICCG& \\\\ \n');  
     fclose(fileID);
 end
 
@@ -47,7 +48,7 @@ else
             fileID = fopen(text,'a');
             fprintf(fileID,'\\hline  \n');
             fprintf(fileID,'\\end{tabular} \n');
-            fprintf(fileID,'\\caption{Comparison between the ICCC and DICCG methods of the average number of linear iterations for the second NR iteration for various contrast between permeability layers. }\\label{table:litertot2} \n');
+            fprintf(fileID,'\\caption{Comparison between the ICCC and DICCG methods of the average number of linear iterations. }\\label{table:litertot2} \n');
             fprintf(fileID,'\\end{minipage}  \n');
             fprintf(fileID,'\\end{table}  \n');
             fclose(fileID);

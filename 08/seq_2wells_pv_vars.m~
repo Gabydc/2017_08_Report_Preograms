@@ -5,11 +5,11 @@ clc
 % for i=1:7
 %     f(i) = figure('visible','off');
 % end
-for cp = [1 ]
+for cp = [0 ]
     cp
-    for per=[ 1 ]
+    for per=[6 ]
         per
-        for def=[ 1]
+        for def=[0 1]
             def
             
             % If we want to use POD pod==1
@@ -27,7 +27,7 @@ for cp = [1 ]
                 
                 
                 
-                for rr=1
+                for rr=1:2
                     rr
                     
                     if (pod == 0) && (rr==2)
@@ -79,7 +79,7 @@ for cp = [1 ]
                     %                 else
                     %                     load T
                     %                 end
-                    Stot = 490;
+                    Stot = 480;
                     dT     = ceil(T/Stot);
                     dTplot = T/4;  % plot only every 100th day
                     N      = fix(T/dTplot);
@@ -111,6 +111,11 @@ for cp = [1 ]
                             p0=rSol.pressure;
                             
                         end
+                        
+                        
+                        
+                        
+                        % rSol= incompTPFA(rSol, G, hT, fluid, 'wells', W);
                         
                         if  def==0
                             [rSol,preport(ts)]    = psolve(rSol);
@@ -153,14 +158,12 @@ for cp = [1 ]
                                     
                                     Z(nx*ny+i,:)=0;
                                 end
-%                                dz = det(Z);
-                              %  if dz < 10^-13
-                              %      solver = PCG_ICSolverAD_cn('tolerance', tol,'maxIterations', maxIterations,'cn',cn,'x0',p0);
-                                 %   sdz{ts} = 'pcg';
-                              %  else
+                                dz = det(Z);
+                                if dz < 10^-13
+                                    solver = PCG_ICSolverAD_cn('tolerance', tol,'maxIterations', maxIterations,'cn',cn,'x0',p0);
+                                    sdz(ts) = 'pcg';
+                                end
                                 solver = DPCG_ICSolverAD('tolerance', tol,'maxIterations', maxIterations, 'Z',Z);
-                              %  sdz{ts} = 'dpcg';
-                              %  end
                                 fn = @(A, b) solver.solveLinearSystem(A, b);
                                 psolve = @(state) incompTPFA_g_o(state, G, hT, fluid, 'wells', W, 'MatrixOutput',true,'LinSolve', fn);
                                 [rSol,preport(ts)]    = psolve(rSol);
@@ -404,10 +407,7 @@ for cp = [1 ]
                             savefigures(f(i), file{i}, dir2)
                         end
                     end
-                 %   St=sparse(St);
-                    clear f figure
-                    savefilesfun
-
+                    
                 end
             end
             
@@ -416,6 +416,8 @@ for cp = [1 ]
         
     end
 end
+clear f figure
+savefilesfun
 
 
 

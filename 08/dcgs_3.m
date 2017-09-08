@@ -1,5 +1,5 @@
 
-function [xf,flag,relres,ii,resvec] = dpcgs(A,b,Z,tol,maxit,M1,M2,x0,varargin)
+function [xf,flag,relres,ii,resvec] = dcgs_3(A,b,Z,tol,maxit,M1,M2,x0,varargin)
 relres=0;
 %DCGS   Deflated Conjugate Gradients Squared Method.
 %   X = DCGS(A,B,Z) attempts to solve the system of linear equations A*X=B for
@@ -173,6 +173,7 @@ end
 
 E=Z'*A*Z;
 EI=sparse(inv(E));
+
 
 % Set up for the method
 [pb]=defvec(Z,EI,A,b);

@@ -6,19 +6,19 @@ close all
 clear all
 clc
 % The capillary pressure can be taked into account (cp =1)
-for cp = [ 0  ]
+for cp = [ 0 1 ]
     
     % The contrast between permeability layers can be varied one layer has
     % permeability of 10*milli*darcy, the secon is varied as
     % 10*10^(-per)*milli*darcy
-    for per=[ 1  ]
+    for per=[ 0 1 2 3 4 5 6 7  ]
         
         % In this part the solver is chosen 0 means ICCG (no deflation) and
         % 1 is with deflation
-        for def=[1 ]
+        for def=[0 1 ]
             def
             % If we want to use POD as deflation vectors pod=1
-            for pod = [  1]
+            for pod = [ 0 1]
                 pod
                 clearvars -except per def pod cp
                 
@@ -51,7 +51,7 @@ for cp = [ 0  ]
                     
                     
                     %Create the directory
-                    dir='/mnt/sda2/cortes/Results/2017/Report/wbt/bc/08_25/';
+                    dir='/mnt/sda2/cortes/Results/2017/Report/wbt/bc/08_25/1/';
                    % dir='/dev/media/Sphinx/Doctorado_Delft/2017/08/Report/wtb/bc/';
                     folder=[ '10-' num2str(k) '_' num2str(sz) 'nz' num2str(nz) 'perm_' num2str(per) 'cp' num2str(cp)];
                     mkdir([dir], folder)
@@ -205,7 +205,7 @@ for cp = [ 0  ]
                                     
                                     
                                    [U,S]=PODbasis(Z);
-                                    if t/day() == 4600
+                                    if ts == 11
                                     nf = nf + 1;
                                     file{nf} = ['eig_pod_' num2str(t/day())];
                                     f(nf) = figure(nf);

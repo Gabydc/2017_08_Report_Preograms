@@ -8,9 +8,9 @@ lx=size(x,1);
 ly=size(x,2);
 
 % Normalize the snapshots
-% for i=1:ly
-%     x(:,i)=x(:,i)/norm(x(:,i)); 
-% end
+for i=1:ly
+    x(:,i)=x(:,i)/norm(x(:,i)); 
+end
 %Compute mean of the snapshots
 xm = mean(x,2);
 % if ly == 2
