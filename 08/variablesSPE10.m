@@ -190,7 +190,7 @@ else
 end
 axis equal off
 hold off
-break
+%break
                     %% Changing wells
                     %Create a well structure to support multiple report steps
                     %clear newW
@@ -304,7 +304,7 @@ hold off
 
 %% Create the directory
 
-dir='/mnt/sda2/cortes/Results/17_08/30/';
+dir='/mnt/sda2/cortes/Results/17_09/27/';
 
 folder=['SPE10_' num2str(nx) '_' num2str(ny) 'l_' num2str(numel(layers)) 'cp_'  num2str(cp) ];
 mkdir([dir], folder)

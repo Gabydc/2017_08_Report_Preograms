@@ -66,8 +66,14 @@ if (pod == 0) && (def == 1)
                 
                 %% Set pressure solver
                 psolveropw
-                
-                %% Solve initial pressure in reservoir
+                  fn = @(A, b) solver.solveLinearSystem(A, b);
+                            psolve = @(state) incompTPFA_g_o(state, G, hT, fluid, 'wells', W, 'MatrixOutput',true,'LinSolve', fn);
+                   %% Define transport solver
+
+        % Implicit transport solver: try with one time step
+        tsolve  = @(state, dT, fluid) implicitTransport(state, G, dT, rock, fluid,  'wells', W, 'Verbose', false);
+               
+                            %% Solve initial pressure in reservoir
                 %rSol = psolve(rSol);
                 rSol = incompTPFA(rSol, G, hT, fluid, 'wells', W);
                 IWS =  rSol.s(:,1);
@@ -188,41 +194,31 @@ oip      = zeros(N,1); oip(1) = sum(rSol.s(:,2).*pv);
                     
                 end
                 
-plotNo = 0;
-Np = 4;
+%%
 
-
-for i = 1 : ceil(ts/Np) : ts
-    i
-                       % ptpv=t*1.2/T;
-                       ptpv = 1.2*((plotNo)/(Np-1));
-                     heading = [sprintf('t=%.2f PVI',ptpv)];
-                     
-                    figure(nf);
-                    h=subplot(2,2,plotNo+1);
-                    plotCellData(G, Sat_w(:,i),'LineStyle','none');  
-                    axis equal tight off, caxis([0 1]), title([ heading]),
-                       colorbar
-              
-                    if nz > 1
-                        view(-25,20)
-                    else
-                        view(0,90)
-                    end
-                    figure(nf1);
-                    h1=subplot(2,2,plotNo+1);
-                    plotCellData(G, Pressure(:,i),'LineStyle','none');
-                     axis equal tight off, %caxis([cmin cmax])
-                     title([ heading]),  colorbar
-                     
-                    if nz > 1
-                        view(-25,20)
-                    else
-                        view(0,90)
-                    end
-                    plotNo = plotNo + 1;
-end
-nf=nf1;
+                pmin=min(Pressure(:,1));
+                pmax=0.9*max(Pressure(:,ts));
+                
+                plotNo = 0;
+                Np = 3;
+                time = (0:dT:T)/day;
+                px = [0.01 0.26 0.51 0.76];
+                
+                nf = nf + 1;
+                figure(nf);
+                %title('Water Saturation');
+                file{nf} = ['Water_saturation'];
+                clim = [0 1];
+                subplotcbspe(nf,clim,ts,Np,G,nz,time,Sat_w)
+                % subplotcbwbt(nf,clim,wbt,Np,G,nz,time,Sat_w)
+                nf1 = nf + 1;
+                figure(nf1);
+                %title('Pressure [bars]');
+                file{nf1} = ['Pressure'];
+                clim = [pmin pmax];
+                subplotcbspe(nf1,clim,ts,Np,G,nz,time,Pressure)
+                % subplotcbwbt(nf1,clim,wbt,Np,G,nz,time,Pressure1)
+                nf=nf1;
 %                    
                 for j=1:ts
                     its(j)=preport(j).iterations;

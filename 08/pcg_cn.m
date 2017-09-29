@@ -193,7 +193,7 @@ if (normr <= tolb)                 % Initial guess is a good enough solution
     return
 end
 
-resvec = zeros(maxit+1,1);         % Preallocate vector for norm of residuals
+%resvec = zeros(maxit+1,1);         % Preallocate vector for norm of residuals
 resvec(1,:) = normr;               % resvec(1) = norm(b-A*x0)
 normrmin = normr;                  % Norm of minimum residual
 rho = 1;
@@ -317,8 +317,10 @@ end
 end
 
  iter=ii;
-% figure(200)
-% plot(x)
+figure(200)
+plot(resvec)
+figure(201)
+plot(relres)
 % hold on
 
 

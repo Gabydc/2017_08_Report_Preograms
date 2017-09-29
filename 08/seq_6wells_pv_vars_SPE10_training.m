@@ -13,15 +13,15 @@ for cp = [0 ]
     cp
     %training = 0, training phase
     %training = 1, test cases
-    training =[1 ]
-    for def=[0  1]
+    training =[0]
+    for def=[0 ]
         def
 
         % If we want to use POD pod==1
         
       %  for pod = [1]
-            pod = 1;
-            dpod=[];
+            pod = 0;
+            %dpod=[];
             
             
 %             if (def == 0)  && (pod == 1)
@@ -32,9 +32,15 @@ for cp = [0 ]
 %             
             
             
-            for rr=1:2
+            for rr=1
                 rr
-                
+                if (def == 0) && (rr == 2)
+                    continue
+                end
+                if (training == 1) && (def == 0)
+                   dpod = [];
+                   pod = 0;
+                end
                 if (pod == 0) && (rr == 2)
                     continue
                 end
@@ -64,7 +70,7 @@ for cp = [0 ]
                 
                 
                 %% Initiate pressure solver
-                rSol = initState(G, W, 500*barsa, [0 1]);
+                rSol = initState(G, W, 550*barsa, [0 1]);
                 
                 %% Set pressure solver
                 psolverop2w
@@ -78,9 +84,9 @@ for cp = [0 ]
                 %% Transport loop
                 %  T      = 100*day();
                 T  = 1.2*sum(pv)/rSol.wellSol(1).flux;
-                % T = max(T);
+                 T = max(T);
                 % T = 10000*day;
-                steps=480;
+                %steps=80;
                 %steps =48;
                 Stot = steps;
                 dT     = ceil(T/steps);
@@ -106,6 +112,9 @@ for cp = [0 ]
                 % and array to hold the oil in place
                 wellSols = cell(N+1,1);  wellSols{1} = getWellSol(W, rSol, fluid);
                 oip      = zeros(N,1); oip(1) = sum(rSol.s(:,2).*pv);
+%                 if training == 1
+%                         load([dir1 'T.mat'],'T') 
+%                     end
                 while t < T,
                     
                     ts=ts+1
@@ -128,7 +137,8 @@ for cp = [0 ]
                     end
                     if training == 1
                         load([dir1 'Z.mat'],'Z')  
-                        
+                       % size(Z)
+                       % pause
                     end
                     if  def==0
                         solver = PCG_ICSolverAD_cn('tolerance', tol,'maxIterations', maxIterations,'cn',cn);
@@ -136,7 +146,15 @@ for cp = [0 ]
                         psolve = @(state) incompTPFA_g_o(state, G, hT, fluid, 'wells', W, 'MatrixOutput',true,'LinSolve', fn);
                         [rSol,preport(ts)]    = psolve(rSol);
                         
-                    else                                    
+                    else    
+                        if rr == 1
+                        Z = Z(:,1:dv);
+                        %size(Z)
+                        else
+                        Z = Z(:,dv-numel(podv{2})+1:dv);
+                        %size(Z)
+                        end
+                       % pause
                             solver = DPCG_ICSolverAD('tolerance', tol,'maxIterations', maxIterations, 'Z',Z,'x0',p0);
                             fn = @(A, b) solver.solveLinearSystem(A, b);
                             psolve = @(state) incompTPFA_g_o(state, G, hT, fluid, 'wells', W, 'MatrixOutput',true,'LinSolve', fn);
@@ -197,6 +215,9 @@ for cp = [0 ]
                     Z(nx*ny+i,:)=0;
                     end
                     save([dir1 'Z.mat'],'Z')
+                    
+                    save([dir1 'T.mat'],'T')
+                    
                 end
                 
               
@@ -269,10 +290,11 @@ for cp = [0 ]
                 
                 
                 
-if training == [1 ]
+%if training == [1 ]
+
 filetx = ['results.txt'];
-                saveres(dir1,filetx,def,pod,dpod,per,ts,dv,preport)
-end
+                saverest(dir1,filetx,def,pod,dpod,ts,dv,preport,training,prp)
+%end
 
                 
                 savefilesfun1
@@ -282,15 +304,15 @@ end
                 dt = [0; ones(ts,1)*T/(ts)]; t = 1.2*cumsum(dt)/T;
                 
                 
-                nf = nf + 1;
-                figure(nf);
-                file{nf} = ['Production_curves'];
-                plot(t,cellfun(@(x) x(2).Sw, wellSols), ...
-                    t,cellfun(@(x) x(2).wcut, wellSols));
-                legend('Sw in completion','Water cut','Location','NorthWest');
-                axis([0 max(t) -.05 1.0]);
-                xlabel('Time (PVI)','FontSize',14)
-                ylabel('Saturation','FontSize',14)
+%                 nf = nf + 1;
+%                 figure(nf);
+%                 file{nf} = ['Production_curves'];
+%                 plot(t,cellfun(@(x) x(2).Sw, wellSols), ...
+%                     t,cellfun(@(x) x(2).wcut, wellSols));
+%                 legend('Sw in completion','Water cut','Location','NorthWest');
+%                 axis([0 max(t) -.05 1.0]);
+%                 xlabel('Time (PVI)','FontSize',14)
+%                 ylabel('Saturation','FontSize',14)
                 
                 %%
                 % Second, we plot the oil rate used in our simulation in units m^3/day
@@ -384,7 +406,7 @@ end
                 
             end
         %end
-        
+      %pause  
     end
     
     end

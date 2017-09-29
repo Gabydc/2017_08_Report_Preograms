@@ -18,15 +18,18 @@ tol = 10^-k;
 % Compute estimated condition number
 cn=0;
 ceigs = 0;
-        % Number of deflation vectors
+% Number of deflation vectors
+steps = 480;
 dv=30;
-podv{1}=[1:30];
-podv{2}=[11:30];
+%podv{1}=[steps-dv+1:steps];
+%podv{2}=[steps-dv+21:steps];
+podv{1}=[steps-dv+1:steps];
+podv{2}=[steps-dv+21:steps];
 dpod=podv{rr};
-    if pod== 0
-                dpod = [];
-            end 
-            
+%     if pod== 0
+%                 dpod = [];
+%             end
+
 %% Save figures option
 sf = true;
 % Numbering for figures
@@ -35,12 +38,12 @@ nf =0;
 % Square domain with homogeneous rock properties, no flow across the
 % boundaries, no gravity, injection in the southeast and production in the
 % northwest corners, both operating at fixed bottom-hole pressure
-gravity off
+gravity on
 
-steps = 480;
+
 cap_scale = 10;
-muw = 0.5;
-muo = 3;
+muw = 1;
+muo = 1;
 rhow = 1000;
 rhoo = 700;
 Sro = 0;
@@ -51,8 +54,8 @@ nw = 2;
 no = 2;
 kw = 1;
 ko = 1;
-%% Dimentions of the reservoir SPE 10
-layers = 1;
+%% Dimensions of the reservoir SPE 10
+layers = 1:5;
 
 nxi = 3;
 nyi = 3;
@@ -61,16 +64,16 @@ ny = 56;
 nz = numel(layers);
 Lx = 60;
 Ly = 220;
-Lz = 1;
+Lz = numel(layers);
 
-    %The grid and the permeability are obtained from the MRST
-   
-    %physDims = [1200, 2200, 2*cartDims(end)] ;   % ft -> m
+%The grid and the permeability are obtained from the MRST
 
-   % max(rock.perm)/min(rock.perm)
-    %The permeability is 
-    
- 
+%physDims = [1200, 2200, 2*cartDims(end)] ;   % ft -> m
+
+% max(rock.perm)/min(rock.perm)
+%The permeability is
+
+
 
 
 
@@ -78,8 +81,8 @@ Lz = 1;
 cartDims = [  nx,  ny, nz];
 %cartDims = [nx ny nz];
 domain = [Lx Ly Lz];
-%physDims = [600, 2200, 2*cartDim(end)] ;  
-physDims = [1200, 4200, 2*cartDims(end)] .* ft();
+%physDims = [600, 2200, 2*cartDim(end)] ;
+physDims = [1200, 4200, 200*cartDims(end)] .* ft();
 %physDims = cartDims .* [20, 10, 2]*ft;
 %G = cartGrid([nx ny nz]);
 %G = computeGeometry(G);
@@ -88,19 +91,19 @@ G      = computeGeometry(cartGrid(cartDims,physDims));
 
 rock     = SPE10_rock(layers);
 rock.perm = convertFrom(rock.perm, milli*darcy);
-    perm = rock.perm(:,1);
-    perm = reshape(perm,domain);
-    permupscaled = sampleFromBox(G,perm);
-    rock.perm=permupscaled;
-   poro = rock.poro(:,1);
-    poro = reshape(poro,domain);
-    poroupscaled = sampleFromBox(G,poro);
-    rock.poro=poroupscaled;    
-    
-    
+perm = rock.perm(:,1);
+perm = reshape(perm,domain);
+permupscaled = sampleFromBox(G,perm);
+rock.perm=permupscaled;
+poro = rock.poro(:,1);
+poro = reshape(poro,domain);
+poroupscaled = sampleFromBox(G,poro);
+rock.poro=poroupscaled;
+
+
 %     max(rock.perm)
 %     min(rock.perm)
-    contperm=max(rock.perm)./min(rock.perm);
+contperm=max(rock.perm)./min(rock.perm);
 is_pos             = rock.poro > 0;
 rock.poro(~is_pos) = min(rock.poro(is_pos));
 
@@ -113,10 +116,12 @@ rock.poro(~is_pos) = min(rock.poro(is_pos));
 % W1_val = 100*barsa;
 % W2_val = 0*barsa;
 % %% Wells values
-well(2:5)=210*barsa;
+prp = 275;
+pri = 1100;
+well(2:5) = prp*barsa;
 % % well(5)=5*meter^3/day;
-well(1) = 700*barsa;
-well(6) = 700*barsa;
+well(1) = pri*barsa;
+well(6) = pri*barsa;
 %% Rock properties
 
 % Set rock initial properties
@@ -138,11 +143,11 @@ pv     = poreVolume(G, rock);
 wtype    = {'bhp', 'bhp', 'bhp', 'bhp', 'bhp'};
 wtarget  = [well(1),   well(2),   well(3),   well(4), well(5)];
 %wrad     = [0.125, 0.125, 0.125, 0.125, 0.125] .* meter;
-wrad(1:6) = 1*meter;
+wrad(1:6) = 1.1*meter;
 %{Sub2ind(ceil(nx/2),ceil(ny/2),1:nz,nx,ny,nz),......
 wloc     =  {Sub2ind(ceil(nxi),ceil(ny/2-5),1:nz,nx,ny,nz), ...
-            Sub2ind(nxi,nyi,1:nz,nx,ny,nz),Sub2ind(nxi,ny-5,1:nz,nx,ny,nz), ...
-            Sub2ind(nx-3,nyi,1:nz,nx,ny,nz),Sub2ind(nx-3,ny-5,1:nz,nx,ny,nz)};
+    Sub2ind(nxi,nyi,1:nz,nx,ny,nz),Sub2ind(nxi,ny-5,1:nz,nx,ny,nz), ...
+    Sub2ind(nx-3,nyi,1:nz,nx,ny,nz),Sub2ind(nx-3,ny-5,1:nz,nx,ny,nz)};
 wname    = {'I1', 'P1', 'P2', 'P3', 'P4'};
 Sign      = [ 1 ,  -1 ,  -1 ,  -1 , -1 ];
 Comp_iI= [1 0];
@@ -157,34 +162,35 @@ Sign(6) = 1;
 
 
 for i = 1 : numel(wtype)
-if Sign(i) == -1
- wcomp{i} = Comp_iP;
-else
-wcomp{i} = Comp_iI;
-end
+    if Sign(i) == -1
+        wcomp{i} = Comp_iP;
+    else
+        wcomp{i} = Comp_iI;
+    end
 end
 
 W = [];
 for w = [1 2 3 4 5 6]
-   W = addWell(W, G, rock, wloc{w}, ...
-                    'Type', wtype{w}, 'Val', wtarget(w), ...
-                    'Radius', wrad(w), 'Name', wname{w}, ...
-                    'Comp_i', wcomp{w}, ...
-                    'Sign', Sign(w));
+    W = addWell(W, G, rock, wloc{w}, ...
+        'Type', wtype{w}, 'Val', wtarget(w), ...
+        'Radius', wrad(w), 'Name', wname{w}, ...
+        'Comp_i', wcomp{w}, ...
+        'Sign', Sign(w));
 end
 
-% 
+%
 % nf = nf + 1;
 % f(nf) = figure(nf);
 % figure(nf)
-% %plotCellData(G, log(rock.perm(:,1)),'LineStyle','none');
+% plotCellData(G, log(rock.perm(:,1)),'LineStyle','none');
 % 
 % clf;
-% plotCellData(G, log(rock.perm(:,1)));
-% for i = 2 :numel(W)
+% %plotCellData(G, log(rock.perm(:,1)));
+% for i = 2 :numel(W)-1
 %     plotWell(G, W(i),'color', 'r');
 % end
 % plotWell(G, W(1), 'color', 'b');
+% plotWell(G, W(6), 'color', 'b');
 % file{nf} = 'Permeability';
 % %title([file{nf} ' field [mD]'])
 % if nz > 1
@@ -194,6 +200,9 @@ end
 % end
 % axis equal off
 % hold off
+% pause
+% plotCellData(G, log(rock.perm(:,1)));
+% % 
 % break
 
 
@@ -203,12 +212,12 @@ close all
 nf = nf + 1;
 f(nf) = figure(nf);
 figure(nf)
-h=plotCellData(G, log(rock.perm(:,1)),'LineStyle','none'); 
+h=plotCellData(G, log(rock.perm(:,1)),'LineStyle','none');
 axis equal tight off
 % xmi = min(log(rock.perm(:,1)));
 % xma = max(log(rock.perm(:,1)));
 % clim = [xmi xma ];
-% 
+%
 % caxis(clim);
 % %
 % h=colorbar;
@@ -229,26 +238,35 @@ end
 hold off
 %break
 
-                    %% Changing wells
-                    %Create a well structure to support multiple report steps
-                    %clear newW
-                    [newW{1:steps,1}] = deal(W);
-                     BHP = zeros(numel(W),steps);
-                     
+%% Changing wells
+%Create a well structure to support multiple report steps
+%clear newW
+[newW{1:steps,1}] = deal(W);
+BHP = zeros(numel(W),steps);
+
 %                    % Valr = zeros(numel(W),steps);
 %                     %Then we'll assign the time-dependent controls
-                    tch =5;
-                    csteps = round(steps/tch);
-%                     
-                    h = 0;
-                    while tch*(h+1) < steps
-                        h=h+1;
-                       BHP(1,(h-1)*tch+1:tch*h) = rand;
-                       BHP(3,(h-1)*tch+1:tch*h) = rand;
-                    end
-% %                     
-                     BHP(2,:) = 1-BHP(3,:);
-                     BHP(4,:) = 1-BHP(1,:);
+tch =10;
+csteps = round(steps/tch);
+%
+h = 0;
+while tch*(h+1) < steps
+    h=h+1;
+    BHP(1,(h-1)*tch+1:tch*h) = rand;
+    BHP(3,(h-1)*tch+1:tch*h) = rand;
+end
+%
+BHP(2,:) = 1-BHP(3,:);
+BHP(4,:) = 1-BHP(1,:);
+%                      BHP(1,:) = 1;
+%                      BHP(2,:) = 1;
+%                      BHP(3,:) = 1;
+%                      BHP(4,:) = 1;
+%
+
+
+
+
 %                     figure
 %                     plot(time,BHP(1,:))
 %                     hold on
@@ -259,25 +277,25 @@ hold off
 %                     plot(time,BHP(4,:))
 %                     axis tight
 %                     break
-%                    
-                   
+%
+
 %                     Valr(1,1:steps/2) = linspace(0.5, 0.8, steps/2)/day;
 %                     Valr(2,steps/2+1:steps) = linspace(0.5, 0.8, steps/2)/day;
 %                     Valr(4,1:steps/2) = linspace(0.5, 0.8, steps/2)/day;
 %                     Valr(3,steps/2+1:steps) = linspace(0.5, 0.8, steps/2)/day;
-                    %Valr(5,1:steps) = linspace(0.5, 0.8, steps)/day;
-                    %Valr =  linspace(0.5, 1, steps)/day();
-                    W1=newW;
-                    for w = 1:numel(newW),
-                        for i = 2:5
-                            newW{w}(i).type = 'bhp';
-                             newW{w}(i).val= (BHP(i-1,w)*140+140)*barsa;
-%                             newW{w}(i).type = 'rate';
-%                            newW{w}(i).val = Valr(i,w);                       
-                        end
-                    end
-                    
-                    W0=newW;
+%Valr(5,1:steps) = linspace(0.5, 0.8, steps)/day;
+%Valr =  linspace(0.5, 1, steps)/day();
+W1=newW;
+for w = 1:numel(newW),
+    for i = 2:5
+        newW{w}(i).type = 'bhp';
+        newW{w}(i).val= (BHP(i-1,w)*prp)*barsa;
+        %                             newW{w}(i).type = 'rate';
+        %                            newW{w}(i).val = Valr(i,w);
+    end
+end
+
+W0=newW;
 
 
 
@@ -346,19 +364,19 @@ hold off
 %% Create the directory
 
 %dir='/mnt/sda2/cortes/Results/17_08/31/1/';
-dir='/mnt/sda2/cortes/Results/2017/Report/wbt/SPE10/training/1/';
+dir='/mnt/sda2/cortes/Results/2017/Report/wbt/SPE10/training/09_25/rand/';
 folder=[ num2str(nx) '_' num2str(ny) '_l_' num2str(numel(layers)) 'cp_'  num2str(cp) ];
 mkdir([dir], folder)
 dir1 = [dir folder '/'];
 
-folder=[  'def_' num2str(def) '_pod_' num2str(numel(dpod)) ];
+folder=[  'def_' num2str(def) '_pod_' num2str(numel(dpod)) 'pp_' num2str(prp) '_pi_' num2str(pri)  ] ;
 mkdir([dir1], folder)
 dir2 = [dir1 folder '/'];
 if training == 0
-
-folder=[  't_' num2str(training) ];
-mkdir([dir1], folder)
-dir2 = [dir1 folder '/'];
+    
+    folder=[  't_' num2str(training) ];
+    mkdir([dir1], folder)
+    dir2 = [dir1 folder '/'];
 end
 
 

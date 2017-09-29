@@ -1,0 +1,48 @@
+function [x,flag,relres,iter,resvec,conda] = pcg_0(A,b,tol,maxit,M1,M2,x0,varargin)
+r0 = b - A*x0;
+rn0 = norm(r0);
+r0 = M1\r0;
+p0 = M2\r0;
+if norm(r0) ~= 0
+    for iter = 1: maxit
+        w = A * p0;
+        alpha = (r0' * r0)/(p0' * w);
+        x = x0 + alpha * p0;
+        r = r0 - alpha * (M1 \ w);
+    
+        beta = (r' * r) / (r0' * r0);
+        p = M2 \ r + beta * p0;
+        flag = 0;
+        rn = norm( r );
+        resvec(iter) = rn;
+        trn = norm( b - A * x );
+        ee = norm(x - x0)/norm(x0);    
+        figure(120)
+     color=[0.9 0.8 0.2];
+     hline=plot(iter,ee,'*','Color',color);
+     hold on
+       %  figure(120)
+     color=[0.2 0.8 0.2];
+     hline=plot(iter,rn,'s','Color',color);
+     color=[0.2 0.5 0.5];
+     hline=plot(iter,trn,'o','Color',color);
+     hold on
+        if (ee >= tol)
+            flag = 1;
+        end
+        if flag == 0
+            break
+        end
+        x0 = x;
+        r0 = r;
+        p0 = p;
+    end
+     legend(['norm( x - x0 )/norm( x0 ) = ' num2str(ee)],['norm( r ) = ' num2str(rn)], ['norm( b - A * x ) = ' num2str(trn)])
+    relres = ee;
+    conda = 0;
+else
+    x = x0;
+
+    
+
+ end
