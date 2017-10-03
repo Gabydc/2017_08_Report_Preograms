@@ -56,33 +56,25 @@ x0 = x;
 
      r = r - alpha*q;                      % compute residual
      error = norm( r ) / bnrm2;            % check convergence
-     if ( error <= tol ), break, end 
-
-     rho_1 = rho;
-
      
-     
-
-        ee = norm(x - x0)/norm(x0);    
+   %%  ee = norm(x - x0)/norm(x0);    
     trn = norm( b - A * x );
     error_r = norm(r)/norm(b);
      figure(120)
      color=[0.9 0.8 0.2];
      hline=plot(ii,log(norm(r)),'*','Color',color);
      hold on
-       %  figure(120)
+         figure(120)
      color=[0.2 0.8 0.2];
      hline=plot(ii,log(trn),'s','Color',color);
      hold on
      color=[0.2 0.5 0.5];
      hline=plot(ii,log(error_r),'o','Color',color);
-%      hold on
-%      color=[0.8 0.3 0.5];
-%      hline=plot(ii,log(),'d','Color',color);
-%      hold on
-%      
-%     
-     
+     hold on
+     if ( error <= tol ), break, end 
+
+     rho_1 = rho;
+
      
   end
 legend(['norm( r ) = ' num2str(norm(r))], ['norm( b - A * x ) =' ...

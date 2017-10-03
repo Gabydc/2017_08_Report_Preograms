@@ -92,7 +92,7 @@ W = verticalWell(W , G, rock, 30, 110, [], 'Type', 'rate',   ...
 
 %% Set time
 DT    = 50*day;
-nstep =  1;      % 2000 days
+nstep =  15;      % 2000 days
 %% Changing wells
 %Create a well structure to support multiple report steps
 %clear newW
@@ -221,6 +221,7 @@ for k = 1 : nstep,
     
     p0(1:n) = x.pressure;
     if use_ICCG,
+        
    t0 = tic; [x, report(k)]  = psolve(x,p0,W);     dt = toc(t0);
    else
         t0 = tic; [x]  = psolve(x);     dt = toc(t0);
@@ -232,10 +233,10 @@ end
                     hold on
                     end
   
-    % t0 = tic;  x =  psolve(x);     dt = toc(t0);
+   % t0 = tic;  x =  psolve(x);     dt = toc(t0);
   %  end
    fprintf('[%02d]: Pressure:  %12.5f [s]\n', k, dt);
-break
+%return
    t0 = tic; x = tsolve(x, DT); dt = toc(t0);
    fprintf('[%02d]: Transport: %12.5f [s]\n', k, dt);
 

@@ -1,4 +1,6 @@
 function [x,flag,relres,iter,resvec] = pcg_Matlab(A,b,tol,maxit,M1,M2,x0,varargin)
+figure(120
+clf
 %PCG   Preconditioned Conjugate Gradients Method.
 %   X = PCG(A,B) attempts to solve the system of linear equations A*X=B for
 %   X. The N-by-N coefficient matrix A must be symmetric and positive
@@ -252,6 +254,7 @@ for ii = 1 : maxit
     trn = norm( b - A * x );
     error_r = norm(r)/norm(b);
      figure(120)
+     
      color=[0.9 0.8 0.2];
      hline=plot(ii,log(norm(r)),'*','Color',color);
      hold on

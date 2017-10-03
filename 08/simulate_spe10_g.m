@@ -18,7 +18,7 @@ if ~exist(spe10_data, 'file'),
 end
 
 %%
-layers = 1 : 35;
+layers = 1 : 5;
 
 cartDims = [60, 220, numel(layers)];
 rock     = getSPE10rock(layers);
@@ -133,8 +133,8 @@ else
 end
 
 %%
-DT    = 100*day;
-nstep =  5;      % 2000 days
+DT    = 50*day;
+nstep =  15;      % 2000 days
 
 Prod = struct('t'  , []                  , ...
               'vpt', zeros([0, numel(W)]), ...
@@ -154,11 +154,11 @@ wres = cell([1, 4]);
 for k = 1 : nstep,
     p0(1:n) = x.pressure;
 
- %   if use_ICCG,
+   if use_ICCG,
    t0 = tic; [x, report(k)]  = psolve(x,p0);     dt = toc(t0);
-  %  else
-    % t0 = tic;  x =  psolve(x);     dt = toc(t0);
-  %  end
+   else
+    t0 = tic;  x =  psolve(x);     dt = toc(t0);
+   end
    fprintf('[%02d]: Pressure:  %12.5f [s]\n', k, dt);
 
    t0 = tic; x = tsolve(x, DT); dt = toc(t0);
